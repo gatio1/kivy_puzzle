@@ -28,10 +28,11 @@ def make_tiles_for_grid():
     HeightOfGridField = math.floor(heigth/3)
     WidthOfGridField = math.floor(width/3)
     for r in range(0,heigth, math.floor(heigth/3)):
-        for c in range(0,width,math.floor(width/3)):
-            if c+math.floor(width/3)<width:            
-                counter = counter+1
-                cv2.imwrite(f"./game_images/img{counter}.png",img[r:r+math.floor(heigth/3), c:c+math.floor(width/3),:])
+        if r+heigth/3<=heigth:
+            for c in range(0,width,math.floor(width/3)):
+                if c+width/3<=width:            
+                    counter = counter+1
+                    cv2.imwrite(f"./game_images/img{counter}.png",img[r:r+math.floor(heigth/3), c:c+math.floor(width/3),:])
 
 
 def sort_image_list(image_list):
@@ -65,22 +66,27 @@ class GameGrid(GridLayout):
     def on_image_touch_down(self, instance, touch):
             if instance.collide_point(*touch.pos):
                 index = self.get_index_of_instance(instance)
-                if index>2 : 
-                    if self.image_list[index-3].source == "":
-                        self.swap_images(instance, self.image_list[index-3])
-                if index<6:
-                    if self.image_list[index+3].source == "":
-                        self.swap_images(instance, self.image_list[index+3])
-                if (index)%3>0:
-                    if self.image_list[index-1].source == "":
-                        self.swap_images(instance, self.image_list[index-1])
-                if (index)%3<2:
-                    if self.image_list[index+1].source == "":
-                        self.swap_images(instance, self.image_list[index+1])
+                self.move_image(index, instance)
                 #self.swap_images(instance, self.image_list[1])
 
                 print('Label touched:', self.is_completed())
-    
+
+    def move_image(self, index, instance):
+            if index>8 | index<0:
+                return
+            if index>2 : 
+                if self.image_list[index-3].source == "":
+                    self.swap_images(instance, self.image_list[index-3])
+            if index<6:
+                if self.image_list[index+3].source == "":
+                    self.swap_images(instance, self.image_list[index+3])
+            if (index)%3>0:
+                if self.image_list[index-1].source == "":
+                    self.swap_images(instance, self.image_list[index-1])
+            if (index)%3<2:
+                if self.image_list[index+1].source == "":
+                    self.swap_images(instance, self.image_list[index+1])
+
     def is_completed(self):
         i=0
         completed = True
@@ -104,13 +110,38 @@ class GameGrid(GridLayout):
         Image2.source = Image_tmp
 
     def randomize(self):
-        for Image in self.image_list:
-            self.swap_images(Image, self.image_list[random.randint(0,len(self.image_list)-1)])
+        arr = [+1, -1, +3, -3]
+        i = 0
+        print("ne randomiziram\n")
+        while i<100:
+            print("randomiziram",i,"\n")
+            idx_in_arr = random.randint(0,3)
+            idx = self.get_index_of_empty_field()+arr[idx_in_arr]
+            if idx>8 or idx<0:
+                print("index is not valid:", idx)
+                continue            
+            print("image index:", idx )
+            for image in self.image_list:
+                if self.get_index_of_instance(image) == idx: 
+                    instance = image
+
+            self.move_image(idx, instance)
+            i = i + 1
+
+    def get_index_of_empty_field(self):
+        i = 0
+        for image in self.image_list:
+            if image.source == "":
+                print("i:", i)
+                return i
+            i = i + 1
 
     def get_index_of_instance(self, instance):
         i = 0
         for image in self.image_list:
-            if(image.source == instance.source): return i 
+            if(image.source == instance.source): 
+                return i 
+            #print("i:", i)
             i = i + 1
     #
 
