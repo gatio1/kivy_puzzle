@@ -3,6 +3,8 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.uix.image import Image
+from kivy.uix.popup import Popup
+from kivy.uix.button import Button
 import os
 import re
 import math
@@ -38,6 +40,8 @@ def make_tiles_for_grid():
 def sort_image_list(image_list):
     return sorted(image_list, key=lambda x: int(x.split('.')[0][3:]))
 class GameGrid(GridLayout):
+    popupButton = Button(text='Continue?')
+    popup = Popup(title='You win',content=popupButton,size_hint=(None, None), size=(400, 400))
     image_list = []
     def __init__(self, **kwargs):
         
@@ -61,6 +65,7 @@ class GameGrid(GridLayout):
         last_image.bind(on_touch_down=self.on_image_touch_down)
         self.image_list.append(last_image)
         self.randomize()
+        #self.popupButton.bind(onpress=self.on_popup_button_press)
                      
     
     def on_image_touch_down(self, instance, touch):
@@ -70,6 +75,9 @@ class GameGrid(GridLayout):
                 #self.swap_images(instance, self.image_list[1])
 
                 print('Label touched:', self.is_completed())
+                if(self.is_completed()):
+                    self.popupButton.bind(on_press=self.on_popup_button_press)
+                    self.popup.open()
 
     def move_image(self, index, instance):
             if index>8 | index<0:
@@ -108,6 +116,10 @@ class GameGrid(GridLayout):
         Image_tmp = Image1.source
         Image1.source = Image2.source
         Image2.source = Image_tmp
+
+    def on_popup_button_press(self, instance):
+        self.randomize()
+        self.popup.dismiss()
 
     def randomize(self):
         arr = [+1, -1, +3, -3]
