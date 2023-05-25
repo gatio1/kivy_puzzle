@@ -36,7 +36,7 @@ def make_tiles_for_grid():
             for c in range(0,width,math.floor(width/NumPhotosInRow)):
                 if c+width/NumPhotosInRow<=width:            
                     counter = counter+1
-                    cv2.imwrite(f"./game_images/img{counter}.png",img[r:r+math.floor(heigth/3), c:c+math.floor(width/NumPhotosInRow),:])
+                    cv2.imwrite(f"./game_images/img{counter}.png",img[r:r+math.floor(heigth/NumPhotosInRow), c:c+math.floor(width/NumPhotosInRow),:])
 
 
 def sort_image_list(image_list):
@@ -66,7 +66,7 @@ class GameGrid(GridLayout):
         self.add_widget(last_image)
         last_image.bind(on_touch_down=self.on_image_touch_down)
         self.image_list.append(last_image)
-        self.randomize()
+        #self.randomize()
         #self.popupButton.bind(onpress=self.on_popup_button_press)
                      
     
