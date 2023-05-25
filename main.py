@@ -14,13 +14,13 @@ import random
 __version__ = "3.0.0"
 HeightOfGridField = 0
 WidthOfGridField = 0
-NumPhotosInRow = 4
+NumPhotosInRow = 5
 
 def make_tiles_for_grid():
     global HeightOfGridField
     global WidthOfGridField
     global NumPhotosInRow
-    img = cv2.imread('image.jpg')
+    img = cv2.imread('image1.jpg')
     heigth, width = img.shape[:2]
     newpath = r'./game_images'   
     if not os.path.exists(newpath):
@@ -130,7 +130,7 @@ class GameGrid(GridLayout):
         print("ne randomiziram\n")
         while i<100:
             print("randomiziram",i,"\n")
-            idx_in_arr = random.randint(0,NumPhotosInRow-1)
+            idx_in_arr = random.randint(0, 3)
             idx = self.get_index_of_empty_field()+arr[idx_in_arr]
             if idx>NumPhotosInRow*NumPhotosInRow-1 or idx<0:
                 print("index is not valid:", idx)
