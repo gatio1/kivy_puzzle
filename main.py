@@ -14,10 +14,12 @@ import random
 __version__ = "3.0.0"
 HeightOfGridField = 0
 WidthOfGridField = 0
+NumPhotosInRow = 4
 
 def make_tiles_for_grid():
     global HeightOfGridField
     global WidthOfGridField
+    global NumPhotosInRow
     img = cv2.imread('image.jpg')
     heigth, width = img.shape[:2]
     newpath = r'./game_images'   
@@ -27,14 +29,14 @@ def make_tiles_for_grid():
     for file in source_dir:
         os.remove("./game_images/"+file)
     counter = 0
-    HeightOfGridField = math.floor(heigth/3)
-    WidthOfGridField = math.floor(width/3)
-    for r in range(0,heigth, math.floor(heigth/3)):
-        if r+heigth/3<=heigth:
-            for c in range(0,width,math.floor(width/3)):
-                if c+width/3<=width:            
+    HeightOfGridField = math.floor(heigth/NumPhotosInRow)
+    WidthOfGridField = math.floor(width/NumPhotosInRow)
+    for r in range(0,heigth, math.floor(heigth/NumPhotosInRow)):
+        if r+heigth/NumPhotosInRow<=heigth:
+            for c in range(0,width,math.floor(width/NumPhotosInRow)):
+                if c+width/NumPhotosInRow<=width:            
                     counter = counter+1
-                    cv2.imwrite(f"./game_images/img{counter}.png",img[r:r+math.floor(heigth/3), c:c+math.floor(width/3),:])
+                    cv2.imwrite(f"./game_images/img{counter}.png",img[r:r+math.floor(heigth/3), c:c+math.floor(width/NumPhotosInRow),:])
 
 
 def sort_image_list(image_list):
@@ -44,9 +46,9 @@ class GameGrid(GridLayout):
     popup = Popup(title='You win',content=popupButton,size_hint=(None, None), size=(400, 400))
     image_list = []
     def __init__(self, **kwargs):
-        
+        global NumPhotosInRow
         super(GameGrid, self).__init__(**kwargs)
-        self.cols = 3
+        self.cols = NumPhotosInRow
         source_dir = os.listdir('./game_images')
         print("files:")
         print(source_dir)
@@ -54,12 +56,12 @@ class GameGrid(GridLayout):
         os.remove("./game_images/"+source_dir.pop())
         print (source_dir)
         for file in source_dir:
-            if re.match(r"img[0-9]+\.png", file) :
-                image = Image(source="./game_images/"+file, allow_stretch=True, keep_ratio=False)
-                self.add_widget(image)
-                image.bind(on_touch_down=self.on_image_touch_down)
-                self.image_list.append(image)
-                print ("new entry: ",self.image_list[-1].source)
+                if re.match(r"img[0-9]+\.png", file) :
+                    image = Image(source="./game_images/"+file, allow_stretch=True, keep_ratio=False)
+                    self.add_widget(image)
+                    image.bind(on_touch_down=self.on_image_touch_down)
+                    self.image_list.append(image)
+                    print ("new entry: ",self.image_list[-1].source)
         last_image = Image(source="", allow_stretch=True, keep_ratio=False)
         self.add_widget(last_image)
         last_image.bind(on_touch_down=self.on_image_touch_down)
@@ -80,18 +82,19 @@ class GameGrid(GridLayout):
                     self.popup.open()
 
     def move_image(self, index, instance):
-            if index>8 | index<0:
+            global NumPhotosInRow
+            if index>NumPhotosInRow*NumPhotosInRow-1 | index<0:
                 return
-            if index>2 : 
-                if self.image_list[index-3].source == "":
-                    self.swap_images(instance, self.image_list[index-3])
-            if index<6:
-                if self.image_list[index+3].source == "":
-                    self.swap_images(instance, self.image_list[index+3])
-            if (index)%3>0:
+            if index>NumPhotosInRow-1 : 
+                if self.image_list[index-NumPhotosInRow].source == "":
+                    self.swap_images(instance, self.image_list[index-NumPhotosInRow])
+            if index<NumPhotosInRow*NumPhotosInRow-NumPhotosInRow:
+                if self.image_list[index+NumPhotosInRow].source == "":
+                    self.swap_images(instance, self.image_list[index+NumPhotosInRow])
+            if (index)%NumPhotosInRow>0:
                 if self.image_list[index-1].source == "":
                     self.swap_images(instance, self.image_list[index-1])
-            if (index)%3<2:
+            if (index)%NumPhotosInRow<NumPhotosInRow-1:
                 if self.image_list[index+1].source == "":
                     self.swap_images(instance, self.image_list[index+1])
 
@@ -122,14 +125,14 @@ class GameGrid(GridLayout):
         self.popup.dismiss()
 
     def randomize(self):
-        arr = [+1, -1, +3, -3]
+        arr = [+1, -1, 0+NumPhotosInRow, 0-NumPhotosInRow]
         i = 0
         print("ne randomiziram\n")
         while i<100:
             print("randomiziram",i,"\n")
-            idx_in_arr = random.randint(0,3)
+            idx_in_arr = random.randint(0,NumPhotosInRow-1)
             idx = self.get_index_of_empty_field()+arr[idx_in_arr]
-            if idx>8 or idx<0:
+            if idx>NumPhotosInRow*NumPhotosInRow-1 or idx<0:
                 print("index is not valid:", idx)
                 continue            
             print("image index:", idx )
